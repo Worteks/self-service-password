@@ -12,10 +12,6 @@ spec:
     description: Path to the Dockerfile to build.
     name: dockerfile
     type: string
-  - default: ""
-    description: Forces FROM in Dockerfile.
-    name: fromimage
-    type: string
   - default: "true"
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS
       registry)
@@ -29,21 +25,6 @@ spec:
     - name: image
       type: image
   steps:
-  - command:
-    - /bin/bash
-    - -c
-    - |
-      if echo "$(inputs.params.fromimage)" | grep -E '/.*/' >/dev/null; then \
-          sed -i "s|^[ ]*FROM[ ]*[^ ]*$|FROM $(inputs.params.fromimage)|" "$(inputs.params.dockerfile)"; \
-      elif test "$(inputs.params.fromimage)"; then \
-          sed -i "s|^[ ]*FROM[ ]*[^ ]*$|FROM REGISTRY_PREFIX/$(inputs.params.fromimage)|" "$(inputs.params.dockerfile)"; \
-      fi
-    image: $(inputs.params.builderimage)
-    name: patch-from
-    resources: {}
-    securityContext:
-      privileged: true
-    workingDir: /workspace/source
   - command:
     - buildah
     - bud

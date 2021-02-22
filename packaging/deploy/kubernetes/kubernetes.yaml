@@ -106,7 +106,7 @@ spec:
                 - ssp-demo
             topologyKey: kubernetes.io/hostname
       containers:
-      - image: registry.example.com/ssp:master
+      - image: docker.io/acksyn/self-service-password:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 15
