@@ -121,7 +121,7 @@ if ( $result === "" ) {
     # Compare mail values
     $mailValues = ldap_get_values($ldap, $entry, $mail_attribute);
     unset($mailValues["count"]);
-    $match = 0;
+    $match = false;
 
     if (!$mail_address_use_ldap) {
         # Match with user submitted values
@@ -130,7 +130,8 @@ if ( $result === "" ) {
                 $mailValue = str_ireplace("smtp:", "", $mailValue);
             }
             if (strcasecmp($mail, $mailValue) == 0) {
-                $match = 1;
+                $match = true;
+                break;
             }
         }
     } else {
