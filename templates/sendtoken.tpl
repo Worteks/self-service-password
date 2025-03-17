@@ -1,6 +1,6 @@
 {if $result !== 'tokensent' and $result !== 'tokensent_ifexists'}
 {if $show_help}
-    <div class="help alert shadow alert-warning"><i class="fa fa-fw fa-info-circle"></i>
+    <div class="fr-alert fr-alert--info fr-mb-md-6v"> <!--dsfr style for info message-->
         {if $mail_address_use_ldap}
             {$msg_sendtokenhelpnomail|unescape: "html" nofilter}
         {else}
@@ -12,39 +12,42 @@
         {/if}
     </div>
 {/if}
-<div class="alert shadow alert-info">
+
+<div class="fr-container fr-background-alt--grey fr-px-md-0 fr-pt-10v fr-pt-md-14v fr-pb-6v fr-pb-md-10v">
+<div class="fr-grid-row fr-grid-row--gutters fr-grid-row--center">
+<div class="fr-col-12 fr-col-md-10 fr-col-lg-9"> <!--dsfr container for large padding-->
 <form action="#" method="post" class="form-horizontal">
-    <div class="row mb-3">
-        <label for="login" class="col-sm-4 col-form-label text-end">{$msg_login}</label>
-        <div class="col-sm-8">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa fa-fw fa-user"></i></span>
-                <input type="text" name="login" id="login" value="{$login}" class="form-control" placeholder="{$msg_login}" autocomplete="off" />
-            </div>
-            <input type="hidden" name="formtoken" id="formtoken" value="{$formtoken}" />
+
+    <div class="fr-fieldset__element"> <!--dsfr login-->
+        <div class="fr-input-group">
+            <label for="login" class="fr-label">{$msg_login}</label>
+            <input type="text" name="login" id="login" value="{$login}" class="fr-input" />
         </div>
+    <input type="hidden" name="formtoken" id="formtoken" value="{$formtoken}" />
     </div>
+
     {if !$mail_address_use_ldap}
-    <div class="row mb-3">
-        <label for="mail" class="col-sm-4 col-form-label text-end">{$msg_mail}</label>
-        <div class="col-sm-8">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa fa-fw fa-envelope-o"></i></span>
-                <input type="email" name="mail" id="mail" value="{$usermail}" class="form-control" placeholder="{$msg_mail}" autocomplete="off" />
-            </div>
+    <div class="fr-fieldset__element"> <!--dsfr email-->
+        <div class="fr-input-group">
+            <label for="mail" class="fr-label">{$msg_mail}</label>
+            <input type="email" name="email" id="email" value="{$usermail}" class="fr-input" />
         </div>
     </div>
+
     {/if}
     {if ($use_captcha)}
         {$captcha_html nofilter}
     {/if}
-    <div class="row mb-3">
-        <div class="offset-sm-4 col-sm-8">
-            <button type="submit" class="btn btn-success">
-                <i class="fa fa-fw fa-check-square-o"></i> {$msg_submit}
+    <div class="fr-fieldset__element"> <!--dsfr submit button-->
+        <div class="fr-btns-group--right">
+            <button type="submit" class="fr-mt-2v fr-btn fr-btn">
+            <i class="fa fa-fw fa-check-square-o"></i> {$msg_submit}
             </button>
         </div>
     </div>
+
 </form>
+</div>
+</div>
 </div>
 {/if}

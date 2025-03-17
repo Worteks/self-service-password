@@ -152,7 +152,7 @@ You change the background image with your own. Set the path to image in
 
 .. code-block:: php
 
-   $background_image = "images/unsplash-space.jpeg";
+ $background_image = "images/unsplash-space.jpeg";
 
 .. tip:: Comment this parameter to falll back to default background color
 
