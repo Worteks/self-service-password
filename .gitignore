@@ -1,5 +1,7 @@
 /vendor/
-/htdocs/vendor/
+/htdocs/vendor/bootstrap
+/htdocs/vendor/font-awesome
+/htdocs/vendor/jquery
 composer.lock
 tests/.phpunit.result.cache
 htdocs/js/ppolicy.js
