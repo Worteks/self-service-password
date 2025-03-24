@@ -55,8 +55,7 @@
     </div>
 {else}
     {if $show_help}
-    <div class="help alert shadow alert-warning">
-        <i class="fa fa-fw fa-info-circle"></i>
+    <div class="fr-alert fr-alert--info fr-mb-md-6v"> <!--dsfr style for info message-->
         {if $sms_use_ldap}
             {$msg_sendsmshelpnosms|unescape: "html" nofilter}
         {else}
@@ -68,39 +67,41 @@
         {/if}
     </div>
     {/if}
-    <div class="alert shadow alert-info">
+    <div class="fr-container fr-background-alt--grey fr-px-md-0 fr-pt-10v fr-pt-md-14v fr-pb-6v fr-pb-md-10v">
+    <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--center">
+    <div class="fr-col-12 fr-col-md-10 fr-col-lg-9"> <!--dsfr container for large padding-->
     <form action="#" method="post" class="form-horizontal">
-        <div class="row mb-3">
-            <label for="login" class="col-sm-4 col-form-label text-end">{$msg_login}</label>
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-fw fa-user"></i></span>
-                    <input type="text" name="login" id="login" value="{$login}" class="form-control" placeholder="{$msg_login}" autocomplete="off" />
-                </div>
+
+        <div class="fr-fieldset__element"> <!--dsfr login-->
+            <div class="fr-input-group">
+                <label for="login" class="fr-label">{$msg_login}</label>
+                <input type="text" name="login" id="login" value="{$login}" class="fr-input" />
             </div>
+            <input type="hidden" name="formtoken" value="{$formtoken}" />
         </div>
         {if ($use_captcha)}
             {$captcha_html nofilter}
         {/if}
         {if !$sms_use_ldap}
-          <input type="hidden" name="formtoken" value="{$formtoken}" />
-          <div class="row mb-3">
-          <label for="telephone" class="col-sm-4 col-form-label text-end">{$msg_phone}</label>
-            <div class="col-sm-8">
-              <div class="input-group">
-                <span class="input-group-text"><i class="fa fa-fw fa-phone"></i></span>
-                <input type="text" name="phone" id="phone" value="{$phone}" class="form-control" placeholder="{$msg_phone}" autocomplete="off" />
+
+        <div class="fr-fieldset__element"> <!--dsfr phone-->
+            <div class="fr-input-group">
+                <label for="telephone" class="fr-label">{$msg_phone}</label>
+                <input type="text" name="phone" id="phone" value="{$phone}" class="fr-input" />
             </div>
-          </div>
         </div>
+
         {/if}
-        <div class="row mb-3">
-            <div class="offset-sm-4 col-sm-8">
-                <button type="submit" class="btn btn-success">
-                    <i class="fa fa-fw fa-search"></i> {$msg_getuser}
+
+        <div class="fr-fieldset__element"> <!--dsfr search button-->
+            <div class="fr-btns-group--right">
+                <button type="submit" class="fr-mt-2v fr-btn fr-btn">
+                <i class="fa fa-fw fa-search"></i> {$msg_getuser}
                 </button>
             </div>
         </div>
     </form>
+    </div>
+    </div>
     </div>
 {/if}
