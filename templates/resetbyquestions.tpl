@@ -1,118 +1,119 @@
 {if $prehook_return and $display_prehook_error and $prehook_return > 0}
-    <div class="result alert shadow alert-warning">
-    <i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i> {$prehook_output[0]}
+    <div class="fr-alert fr-alert--warning fr-mb-md-6v"> <!--dsfr style for warning message-->
+    {$prehook_output[0]}
     </div>
 {/if}
 {if $posthook_return and $display_posthook_error and $posthook_return > 0}
-    <div class="result alert shadow alert-warning">
-    <i class="fa fa-fw fa-exclamation-triangle" aria-hidden="true"></i> {$posthook_output[0]}
+    <div class="fr-alert fr-alert--warning fr-mb-md-6v"> <!--dsfr style for warning message-->
+    {$posthook_output[0]}
     </div>
 {/if}
 {if $result !== 'passwordchanged'}
     {if $show_help}
-    <div class="help alert shadow alert-warning">
-    <i class="fa fa-fw fa-info-circle"></i> {$msg_resetbyquestionshelp|unescape: "html" nofilter}
+    <div class="fr-alert fr-alert--info fr-mb-md-6v"> <!--dsfr style for info message-->
+    {$msg_resetbyquestionshelp|unescape: "html" nofilter}
     {if $question_populate_enable }
-        <br /><i class="fa fa-fw fa-info-circle"></i> {$msg_questionspopulatehint}
+        <br /> {$msg_questionspopulatehint}
     {/if}
     </div>
     {/if}
+    <!--dsfr il faut enlever la possibilité de mettre le ppolicy au-dessus, il doit être intégré dans le cadre, en bas
     {if $pwd_show_policy !== "never" and $pwd_show_policy_pos === 'above'}
         {include file="policy.tpl"}
     {/if}
-    <div class="alert shadow alert-info">
-    <form action="#" method="post" class="form-horizontal">
-        <div class="row mb-3">
-            <label for="login" class="col-sm-4 col-form-label text-end">{$msg_login}</label>
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-fw fa-user"></i></span>
-                    <input type="text" name="login" id="login" value="{$login}" class="form-control" placeholder="{$msg_login}" />
+    -->
+    <div class="fr-container fr-background-alt--grey fr-px-md-0 fr-pt-10v fr-pt-md-14v fr-pb-6v fr-pb-md-10v">
+    <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--center">
+    <div class="fr-col-12 fr-col-md-10 fr-col-lg-9"> <!--dsfr container for large padding-->
+            <form action="#" method="post" class="form-horizontal">
+                <div class="fr-fieldset__element">
+                    <div class="fr-input-group">
+                        <label for="login" class="fr-label">{$msg_login}</label>
+                        <input type="text" name="login" id="login" value="{$login}" class="fr-input" />
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        {if $questions_count > 1}
-            {for $q_num = 1 to $questions_count}
-                <div class="row mb-3">
-                    <label for="question{$q_num}" class="col-sm-4 col-form-label text-end">{$msg_question} {$q_num}</label>
-                    <div class="col-sm-8">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-fw fa-question"></i></span>
-                            <select name="question[]" id="question{$q_num}" class="form-control question">
-                                <option value="">{$msg_question}</option>
-                                {foreach from=$msg_questions key=value item=text}
-                                    <option value="{$value}" {if $question[$q_num-1] == $value}selected="selected"{/if}>{$text}</option>
-                                {/foreach}
-                            </select>
+                {if $questions_count > 1}
+                    {for $q_num = 1 to $questions_count}
+                        <div class="row mb-3">
+                            <label for="question{$q_num}" class="col-sm-4 col-form-label text-end">{$msg_question} {$q_num}</label>
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-fw fa-question"></i></span>
+                                    <select name="question[]" id="question{$q_num}" class="form-control question">
+                                        <option value="">{$msg_question}</option>
+                                        {foreach from=$msg_questions key=value item=text}
+                                            <option value="{$value}" {if $question[$q_num-1] == $value}selected="selected"{/if}>{$text}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="fr-fieldset__element">
+                        <div class="fr-input-group">
+                            <label for="answer{$q_num}" class="fr-label">{$msg_answer} {$q_num}</label>
+                            <input type="text" name="answer[]" id="answer{$q_num}" class="fr-input" />
                         </div>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="answer{$q_num}" class="col-sm-4 col-form-label text-end">{$msg_answer} {$q_num}</label>
-                    <div class="col-sm-8">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-fw fa-pencil"></i></span>
-                            <input type="text" name="answer[]" id="answer{$q_num}" class="form-control" placeholder="{$msg_answer}" autocomplete="off" />
-                        </div>
-                    </div>
-                </div>
-            {/for}
-        {else}
-            <div class="row mb-3">
-                <label for="question" class="col-sm-4 col-form-label text-end">{$msg_question}</label>
-                <div class="col-sm-8">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-fw fa-question"></i></span>
-                        <select name="question" id="question" class="form-control">
+
+                    {/for}
+                {else}
+
+                <div class="fr-fieldset__element"> <!--dsfr question-->
+                    <div class="fr-select-group">
+                        <label class="fr-label" for="question">{$msg_question}</label>
+                        <select class="fr-select" id="question" name="question">
+                            <option value="" selected disabled hidden> Sélectionner une option</option>
                             {foreach from=$msg_questions key=value item=text}
-                                <option value="{$value}">{$text}</option>
+                            <option value="{$value}">{$text}</option>
                             {/foreach}
                         </select>
                     </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <label for="answer" class="col-sm-4 col-form-label text-end">{$msg_answer}</label>
-                <div class="col-sm-8">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fa fa-fw fa-pencil"></i></span>
-                        <input type="text" name="answer" id="answer" class="form-control" placeholder="{$msg_answer}" autocomplete="off" />
+
+
+                    <div class="fr-fieldset__element"> <!--dsfr answer-->
+                        <div class="fr-input-group">
+                            <label for="answer" class="fr-label">{$msg_answer}</label>
+                            <input type="text" name="answer" id="answer" class="fr-input" />
+                        </div>
+                    </div>
+
+                {/if}
+                <div class="fr-fieldset__element"> <!--dsfr password-->
+                    <div class="fr-input-group">
+                        <label for="newpassword" class="fr-label">{$msg_newpassword}</label>
+                        <input type="password" autocomplete="new-password" name="newpassword" id="newpassword" class="fr-input"/>
                     </div>
                 </div>
-            </div>
-        {/if}
-        <div class="row mb-3">
-            <label for="newpassword" class="col-sm-4 col-form-label text-end">{$msg_newpassword}</label>
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-fw fa-lock"></i></span>
-                    <input type="password" autocomplete="new-password" name="newpassword" id="newpassword" class="form-control" placeholder="{$msg_newpassword}" />
+                <div class="fr-fieldset__element"> <!--dsfr password-->
+                    <div class="fr-input-group">
+                        <label for="confirmpassword" class="fr-label">{$msg_confirmpassword}</label>
+                        <input type="password" autocomplete="new-password" name="confirmpassword" id="confirmpassword" class="fr-input"/>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <label for="confirmpassword" class="col-sm-4 col-form-label text-end">{$msg_confirmpassword}</label>
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-fw fa-lock"></i></span>
-                    <input type="password" autocomplete="new-password" name="confirmpassword" id="confirmpassword" class="form-control" placeholder="{$msg_confirmpassword}" />
+
+                <div class="fr-fieldset__element"> <!--password policy-->
+                {if $pwd_show_policy !== "never" and $pwd_show_policy_pos === 'below'}
+                {include file="policy.tpl"}
+                {/if}
                 </div>
-            </div>
-        </div>
-        {if ($use_captcha)}
-             {$captcha_html nofilter}
-        {/if}
-        <div class="row mb-3">
-            <div class="offset-sm-4 col-sm-8">
-                <button type="submit" class="btn btn-success">
-                    <i class="fa fa-fw fa-check-square-o"></i> {$msg_submit}
-                </button>
-            </div>
-        </div>
-    </form>
+
+                {if ($use_captcha)}
+                    {$captcha_html nofilter}
+                {/if}
+
+                <div class="fr-fieldset__element"> <!--dsfr submit button-->
+                    <div class="fr-btns-group--right">
+                        <button type="submit" class="fr-mt-2v fr-btn fr-btn">
+                        <i class="fa fa-fw fa-check-square-o"></i> {$msg_submit}
+                        </button>
+                    </div>
+                </div>
+            </form>
     </div>
-    {if $pwd_show_policy !== "never" and $pwd_show_policy_pos === 'below'}
-        {include file="policy.tpl"}
-    {/if}
+    </div>
+    </div>
+
 {/if}
