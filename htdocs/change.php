@@ -126,6 +126,7 @@ if ( $result === "" ) {
                              );
         $ldap_connection = $ldapInstance->connect();
         $ldap = $ldap_connection[0];
+        $result = $ldap_connection[1];
     }
     # Bind with old password
     $bind = ldap_bind($ldap, $userdn, $oldpassword);
