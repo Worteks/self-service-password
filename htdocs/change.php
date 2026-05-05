@@ -66,113 +66,128 @@ if ( ( $result === "" ) and $use_captcha) { $result = $captchaInstance->verify_c
 #==============================================================================
 if ( $result === "" ) {
 
-    if ( !isset($ldap_build_user_dn) ) {
-        # Connect to LDAP
-        $ldap_connection = $ldapInstance->connect();
+    # Connect to LDAP
+    if (isset($ldap_build_user_dn)) {
+        $ldapInstance->ldap_binddn = null;
+        $ldapInstance->ldap_bindpw = null;
+    }
+    $ldap_connection = $ldapInstance->connect();
 
-        $ldap = $ldap_connection[0];
-        $result = $ldap_connection[1];
+    $ldap = $ldap_connection[0];
+    $result = $ldap_connection[1];
 
-        $ldap_filter = str_replace("{login}", $login, $ldap_filter);
-        $search = $ldapInstance->search_with_scope($ldap_scope, $ldap_base, $ldap_filter);
+    if ($ldap) {
 
-        $errno = ldap_errno($ldap);
-        if ( $errno ) {
-            $result = "ldaperror";
-            error_log("LDAP - Search error $errno  (".ldap_error($ldap).")");
-        } else {
-
-            # Get user DN
-            $entry = ldap_first_entry($ldap, $search);
-
-            if( !$entry ) {
-                $result = "badcredentials";
-                error_log("LDAP - User $login not found");
-            } else {
-                # Get user email for notification
-                if ($notify_on_change) {
-                    $mail = \Ltb\AttributeValue::ldap_get_mail_for_notification($ldap, $entry, $mail_attributes);
-                }
-
-                # Check objectClass to allow samba and shadow updates
-                $ocValues = ldap_get_values($ldap, $entry, 'objectClass');
-                if ( !in_array( 'sambaSamAccount', $ocValues ) and !in_array( 'sambaSAMAccount', $ocValues ) ) {
-                    $samba_mode = false;
-                }
-                if ( !in_array( 'shadowAccount', $ocValues ) ) {
-                    $shadow_options['update_shadowLastChange'] = false;
-                    $shadow_options['update_shadowExpire'] = false;
-                }
-
-                $userdn = ldap_get_dn($ldap, $entry);
-                $entry_array = ldap_get_attributes($ldap, $entry);
-                $entry_array['dn'] = $userdn;
-            }
-        }
-    } else {
         # Search for user
-        $userdn = str_replace("{login}", $login, $ldap_build_user_dn);
-        $entry_array['dn'] = $userdn;
-        $ldapInstance = new \Ltb\Ldap(
-                                 $ldap_url,
-                                 $ldap_starttls,
-                                 $userdn,
-                                 $oldpassword,
-                                 isset($ldap_network_timeout) ? $ldap_network_timeout : null,
-                                 $userdn,
-                                 null,
-                                 isset($ldap_krb5ccname) ? $ldap_krb5ccname : null,
-                                 isset($ldap_page_size) ? $ldap_page_size : 0
-                             );
-        $ldap_connection = $ldapInstance->connect();
-        $ldap = $ldap_connection[0];
-        $result = $ldap_connection[1];
-    }
-    # Bind with old password
-    $bind = ldap_bind($ldap, $userdn, $oldpassword);
-    if ( !$bind ) {
-        $result = "badcredentials";
-        $errno = ldap_errno($ldap);
-        if ( $errno ) {
-            error_log("LDAP - Bind user error $errno  (".ldap_error($ldap).")");
+        $userdn = "";
+        if (isset($ldap_build_user_dn)) {
+            # Build user DN, adapt search parameters and bind with user account
+            $userdn = str_replace("{login}", $login, $ldap_build_user_dn);
+            $ldap_scope = "base";
+            $ldap_base = $userdn;
+            $ldap_filter = '(objectClass=*)';
+            $bind = ldap_bind($ldap, $userdn, $oldpassword);
+            if ( !$bind ) {
+                $result = "badcredentials";
+                $errno = ldap_errno($ldap);
+                if ( $errno ) {
+                    error_log("LDAP - Bind user error $errno  (".ldap_error($ldap).")");
+                }
+            }
+        } else {
+            # Use configured search parameters
+            $ldap_filter = str_replace("{login}", $login, $ldap_filter);
         }
+        if ( !$result ) {
+            $search = $ldapInstance->search_with_scope($ldap_scope, $ldap_base, $ldap_filter);
+            $errno = ldap_errno($ldap);
 
-        $accountStatus = $directory->getAccountStatus($ldap, $errno);
+            if ( $errno ) {
+                $result = "ldaperror";
+                error_log("LDAP - Search error $errno  (".ldap_error($ldap).")");
 
-        if( !empty($accountStatus['EXTENDED_ERROR']) and
-            !empty($accountStatus['LDAP_ERROR']) )
-        {
-            error_log("LDAP - Bind user extended_error ".
-                      $accountStatus['EXTENDED_ERROR'] . "  (" .
-                      $accountStatus['LDAP_ERROR'] . ")");
-        }
+                # If we build user DN and user account can't read its own entry, we can still try to change the password
+                if (isset($ldap_build_user_dn)) { $result = ""; }
+            } else {
 
-        if( !empty($accountStatus['PASSWORD_MUST_CHANGE']) )
-        {
-            error_log("LDAP - Bind user password needs to be changed");
-            $who_change_password = "manager";
-            $result = "";
-        }
+                # Get user attributes
+                $entry = ldap_first_entry($ldap, $search);
 
-        if( !empty($accountStatus['PASSWORD_EXPIRED']) and
-            $ldap_options['change_expired_password'] )
-        {
-            error_log("LDAP - Bind user password is expired");
-            $who_change_password = "manager";
-            $result = "";
-        }
-    }
-    if ( !$result )  {
-        # Rebind as Manager if needed
-        if ( $who_change_password == "manager" ) {
-            $bind = ldap_bind($ldap, $ldap_binddn, $ldap_bindpw);
-        }
-    }
+                if( !$entry ) {
+                    $result = "badcredentials";
+                    error_log("LDAP - User $login not found");
+                } else {
+                    # Get user email for notification
+                    if ($notify_on_change) {
+                        $mail = \Ltb\AttributeValue::ldap_get_mail_for_notification($ldap, $entry, $mail_attributes);
+                    }
 
-    if ( $use_ratelimit ) {
-        if ( ! allowed_rate($login,$_SERVER[$client_ip_header],$rrl_config) ) {
-            $result = "throttle";
-            error_log("LDAP - User $login too fast");
+                    # Check objectClass to allow samba and shadow updates
+                    $ocValues = ldap_get_values($ldap, $entry, 'objectClass');
+                    if ( !in_array( 'sambaSamAccount', $ocValues ) and !in_array( 'sambaSAMAccount', $ocValues ) ) {
+                        $samba_mode = false;
+                    }
+                    if ( !in_array( 'shadowAccount', $ocValues ) ) {
+                        $shadow_options['update_shadowLastChange'] = false;
+                        $shadow_options['update_shadowExpire'] = false;
+                    }
+
+                    $userdn = ldap_get_dn($ldap, $entry);
+                    $entry_array = ldap_get_attributes($ldap, $entry);
+                    $entry_array['dn'] = $userdn;
+                }
+            }
+            if ($userdn) {
+
+                # Bind with old password
+                $bind = ldap_bind($ldap, $userdn, $oldpassword);
+                if ( !$bind ) {
+                    $result = "badcredentials";
+                    $errno = ldap_errno($ldap);
+                    if ( $errno ) {
+                        error_log("LDAP - Bind user error $errno  (".ldap_error($ldap).")");
+                    }
+
+                    $accountStatus = $directory->getAccountStatus($ldap, $errno);
+
+                    if( !empty($accountStatus['EXTENDED_ERROR']) and
+                        !empty($accountStatus['LDAP_ERROR']) )
+                    {
+                        error_log("LDAP - Bind user extended_error ".
+                                  $accountStatus['EXTENDED_ERROR'] . "  (" .
+                                  $accountStatus['LDAP_ERROR'] . ")");
+                    }
+
+                    if( !empty($accountStatus['PASSWORD_MUST_CHANGE']) )
+                    {
+                        error_log("LDAP - Bind user password needs to be changed");
+                        $who_change_password = "manager";
+                        $result = "";
+                    }
+
+                    if( !empty($accountStatus['PASSWORD_EXPIRED']) and
+                        $ldap_options['change_expired_password'] )
+                    {
+                        error_log("LDAP - Bind user password is expired");
+                        $who_change_password = "manager";
+                        $result = "";
+                    }
+                }
+                if ( !$result )  {
+                    # Rebind as Manager if needed
+                    if ( $who_change_password == "manager" ) {
+                        $bind = ldap_bind($ldap, $ldap_binddn, $ldap_bindpw);
+                    }
+                }
+            }
+
+            if ( $use_ratelimit ) {
+                if ( ! allowed_rate($login,$_SERVER[$client_ip_header],$rrl_config) ) {
+                    $result = "throttle";
+                    error_log("LDAP - User $login too fast");
+                }
+            }
+
         }
     }
 }
